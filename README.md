@@ -13,7 +13,7 @@ python -m venv venv
 ```
 
 ```
-source venv/bin/activate
+source venv/Scripts/activate
 ```
 
 Установить зависимости из файла requirements.txt:
@@ -34,11 +34,11 @@ cd api_yamdb
 Выполнить миграции:
 
 ```
-python3 manage.py migrate
+python manage.py migrate
 ```
 
 Запустить проект:
 
 ```
-python3 manage.py runserver
+python manage.py runserver
 ```
