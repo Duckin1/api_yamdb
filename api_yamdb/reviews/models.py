@@ -23,7 +23,8 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
-        related_name='categories'
+        related_name='categories',
+        null=True
     )
     genre = models.ManyToManyField(Genre)
     name = models.TextField(max_length=256)
