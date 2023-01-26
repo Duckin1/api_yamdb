@@ -10,4 +10,4 @@ class UserRoles(Enum):
 
     @classmethod
     def choices(cls):
-        
+        return tuple((attribute.name, attribute.value) for attribute in cls)
