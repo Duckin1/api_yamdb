@@ -4,8 +4,8 @@ from django.db import models
 from .enum import UserRoles
 
 
+LENGTH_TEXT = 35  # Надо перенести в settings
 
-LENGTH_TEXT = 35 # Надо перенести в settings
 
 class User(AbstractUser):
     '''Класс пользователя.'''
@@ -60,7 +60,3 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == UserRoles.user.name
-
-
-
-
