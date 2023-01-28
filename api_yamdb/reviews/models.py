@@ -38,12 +38,12 @@ class Review(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='rewiews',
+        related_name='reviews',
     )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='title'
+        related_name='reviews'
     )
     text = models.TextField()
     score = models.IntegerField(validators=[
