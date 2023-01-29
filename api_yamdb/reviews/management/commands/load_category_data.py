@@ -6,7 +6,7 @@ from reviews.models import Category
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('static/data/category.csv', 'r') as csvfile:
+        with open('static/data/category.csv', 'r', encoding='utf-8') as csvfile:
             reader = DictReader(csvfile)
             print(reader)
             for row in reader:
