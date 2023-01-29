@@ -1,7 +1,7 @@
 from csv import DictReader
 from django.core.management import BaseCommand
 
-from reviews.models import Title
+from reviews.models import Title, Category
 
 
 class Command(BaseCommand):
@@ -9,6 +9,6 @@ class Command(BaseCommand):
         with open('static/data/titles.csv', 'r') as csvfile:
             reader = DictReader(csvfile)
             for row in reader:
-                title = Title(id=row['id'], name=row['name'],
-                              year=row['year'], category=row['category'])
+                title = Title(id=row['id'], name=row['name'], year=row['year'],
+                              category=Category.objects.get(id=row['category']))
                 title.save()
