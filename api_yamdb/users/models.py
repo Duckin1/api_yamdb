@@ -4,7 +4,6 @@ from django.db import models
 from .enum import UserRoles
 
 
-LENGTH_TEXT = 35  # Надо перенести в settings
 
 
 class User(AbstractUser):
