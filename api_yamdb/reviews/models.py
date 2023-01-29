@@ -49,6 +49,7 @@ class Review(models.Model):
     score = models.IntegerField(validators=[
         MinValueValidator(1), MaxValueValidator(10)
     ])
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     def __str__(self):
         return self.text
@@ -66,6 +67,7 @@ class Comment(models.Model):
         related_name='comments',
     )
     text = models.TextField()
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     def __str__(self):
         return self.text

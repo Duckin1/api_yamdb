@@ -16,8 +16,10 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+
     class Meta:
-        fields = ('id', 'name', 'year', 'desctiption', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
 
@@ -40,6 +42,7 @@ class CommentSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         slug_field='username'
     )
+    review = ReviewSerializer(read_only=True)
 
     class Meta:
         model = Review
