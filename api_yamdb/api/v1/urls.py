@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (CategoryViewSet, GenreViewSet, TitleViewSet, ReviewViewSet,
-                    CommentViewSet)
+                    CommentViewSet, RegisterUserViewSet, get_jwt_token)
 
 app_name = 'api'
 
@@ -17,5 +17,7 @@ router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
                 CommentViewSet, basename='comment')
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('auth/signup/', RegisterUserViewSet.as_view(), name='register'),
+    path('auth/token/', get_jwt_token, name='token')
 ]
