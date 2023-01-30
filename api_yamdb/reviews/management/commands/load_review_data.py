@@ -7,7 +7,7 @@ from users.models import User
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('static/data/review.csv', 'r') as csvfile:
+        with open('static/data/review.csv', 'r', encoding='utf-8') as csvfile:
             reader = DictReader(csvfile)
             for row in reader:
                 review = Review(id=row['id'], title_id=row['title_id'],
