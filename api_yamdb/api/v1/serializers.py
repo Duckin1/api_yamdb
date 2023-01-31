@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Title, Review, GenreTitle
 from users.models import User
 
 
@@ -17,8 +17,25 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Title
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    description = serializers.CharField(required=False)
+    genre = serializers.SlugRelatedField(
+        slug_field="slug",
+        queryset=Genre.objects.all(),
+        many=True,
+    )
+    category = serializers.SlugRelatedField(
+        slug_field="slug", queryset=Category.objects.all()
+    )
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
@@ -53,21 +70,26 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
+    # username = serializers.CharField(
+    #     validators=[
+    #         UniqueValidator(queryset=User.objects.all())
+    #     ]
+    # )
+    # email = serializers.EmailField(
+    #     validators=[
+    #         UniqueValidator(queryset=User.objects.all())
+    #     ]
+    # )
 
     def validate_username(self, value):
         if value.lower() == "me":
             raise serializers.ValidationError("Username 'me' is not valid")
         return value
+
+    # def validate_email(self, value):
+    #     if len(value) >= 254:
+    #         raise serializers.ValidationError('Поле для Email слишком длинное')
+    #     return value
 
     class Meta:
         model = User

@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
-from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
+from .serializers import (CategorySerializer, GenreSerializer, TitleReadSerializer, TitlePostSerializer,
                           ReviewSerializer, CommentSerializer,
                           UserRegisterSerializer, TokenSerializer)
 
@@ -16,19 +16,26 @@ from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH'):
+            return TitlePostSerializer
+        return TitleReadSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -79,6 +86,7 @@ class RegisterUserViewSet(CreateAPIView):
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(["POST"])
