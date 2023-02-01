@@ -2,34 +2,28 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from reviews.models import Category, Genre, Title, Review
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
-from .permissions import AdminOnlyPermission
-from .serializers import (
-    CategorySerializer,
-    TitlePostSerializer,
-    ReviewSerializer,
-    GenreSerializer,
-    CommentSerializer,
-    TokenSerializer,
-    UserSerializer,
-    UserSerializerOrReadOnly,
-)
-
+from .permissions import (AdminOnlyPermission, IsAdminSafeMethods,
+                          ReviewAndCommentsPermissions)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitlePostSerializer, TokenSerializer, UserSerializer,
+                          UserSerializerOrReadOnly)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
+    permission_classes = (IsAdminSafeMethods,)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -40,15 +34,17 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    permission_classes = (AdminOnlyPermission,)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
             return TitlePostSerializer
-        return TitleReadSerializer
+        return TitlePostSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (ReviewAndCommentsPermissions,)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -62,6 +58,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (ReviewAndCommentsPermissions,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))
