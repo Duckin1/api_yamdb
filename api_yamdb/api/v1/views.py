@@ -12,7 +12,11 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
 
-from .permissions import AdminOnlyPermission
+from .permissions import (
+    AdminOnlyPermission,
+    IsAdminSafeMethods,
+    ReviewAndCommentsPermissions
+)
 from .serializers import (
     CategorySerializer,
     TitlePostSerializer,
@@ -30,6 +34,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
+    permission_classes = (IsAdminSafeMethods,)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -40,6 +45,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    permission_classes = (AdminOnlyPermission,)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
@@ -49,6 +55,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (ReviewAndCommentsPermissions,)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -62,6 +69,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (ReviewAndCommentsPermissions,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))

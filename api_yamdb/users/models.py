@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 
 from .enum import UserRoles
@@ -7,12 +8,16 @@ from .enum import UserRoles
 
 
 class User(AbstractUser):
-    '''Класс пользователя.'''
+    """Класс пользователя."""
     username = models.CharField(
         max_length=150,
         verbose_name='Логин',
         unique=True,
         db_index=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Имя пользователя содержит недопустимый символ'
+        )]
     )
     first_name = models.CharField(
         max_length=150,
