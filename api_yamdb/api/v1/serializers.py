@@ -105,7 +105,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data['username'] == 'me':
-            raise serializers.ValidationError('Имя me использовать нельзя !')
+            raise serializers.ValidationError('Использовать имя me в качестве username запрещено')
         return data
 
 
