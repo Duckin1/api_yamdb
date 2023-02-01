@@ -1,8 +1,10 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import (CategoryViewSet, GenreViewSet, TitleViewSet, ReviewViewSet,
-                    CommentViewSet, get_jwt_token, sending_mail, UserViewSet)
+
+from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                    ReviewViewSet, TitleViewSet, UserViewSet, get_jwt_token,
+                    sending_mail)
 
 app_name = 'api'
 

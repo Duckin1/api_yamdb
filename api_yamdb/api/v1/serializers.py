@@ -1,11 +1,6 @@
-from reviews.models import Category, Genre, Title, Review
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
-from rest_framework.validators import UniqueTogetherValidator
-
-
-from reviews.models import Category, Genre, Title, Review, GenreTitle
-
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from reviews.models import Category, Genre, GenreTitle, Review, Title
 from users.models import User
 
 
@@ -80,13 +75,13 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('review',)
 
 
-
 class UserSerializerOrReadOnly(serializers.ModelSerializer):
     role = serializers.CharField(read_only=True)
 
     class Meta:
         fields = '__all__'
         model = User
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,10 +103,10 @@ class UserSerializer(serializers.ModelSerializer):
             )
         ]
 
-        def validate(self, data):
-            if data['username'] == 'me':
-                raise serializers.ValidationError('Нельзя подписаться на себя!')
-            return data
+    def validate(self, data):
+        if data['username'] == 'me':
+            raise serializers.ValidationError('Имя me использовать нельзя !')
+        return data
 
 
 class TokenSerializer(serializers.Serializer):

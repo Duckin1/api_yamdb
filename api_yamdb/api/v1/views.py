@@ -10,23 +10,18 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
 from .mixins import CreateListDeleteViewSet
-from .permissions import AdminOnlyPermission, AdminOrReadOnly
-from .serializers import (
-    CategorySerializer,
-    TitlePostSerializer,
-    TitleReadSerializer,
-    ReviewSerializer,
-    GenreSerializer,
-    CommentSerializer,
-    TokenSerializer,
-    UserSerializer,
-    UserSerializerOrReadOnly,
-)
 
+=======
+from .permissions import (AdminOnlyPermission, IsAdminSafeMethods,
+                          ReviewAndCommentsPermissions, AdminOnlyPermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitlePostSerializer, TokenSerializer, UserSerializer,
+                          UserSerializerOrReadOnly)
 
 class CategoryViewSet(CreateListDeleteViewSet):
     queryset = Category.objects.all()
@@ -55,11 +50,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
             return TitlePostSerializer
-        return TitleReadSerializer
+        return TitlePostSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (ReviewAndCommentsPermissions,)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -73,6 +69,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (ReviewAndCommentsPermissions,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))
