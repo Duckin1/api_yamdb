@@ -53,6 +53,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'title', 'text', 'score')
         read_only_fields = ('title',)
 
+    validators = [
+        UniqueTogetherValidator(
+            queryset=Review.objects.all(),
+            fields=('author', 'title')
+        )
+    ]
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
