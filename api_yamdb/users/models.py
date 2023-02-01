@@ -5,15 +5,12 @@ from django.db import models
 from .enum import UserRoles
 
 
-
-
 class User(AbstractUser):
     """Класс пользователя."""
     username = models.CharField(
         max_length=150,
         verbose_name='Логин',
         unique=True,
-        db_index=True,
         validators=[RegexValidator(
             regex=r'^[\w.@+-]+$',
             message='Имя пользователя содержит недопустимый символ'
