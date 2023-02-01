@@ -1,7 +1,8 @@
+from reviews.models import Category, Genre, Title, Review
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Category, Genre, Title, Review
 from users.models import User
 
 
@@ -52,28 +53,43 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('review',)
 
 
-class UserRegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-
-    def validate_username(self, value):
-        if value.lower() == "me":
-            raise serializers.ValidationError("Username 'me' is not valid")
-        return value
+class UserSerializerOrReadOnly(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
 
     class Meta:
+        fields = '__all__'
         model = User
-        fields = ('username', 'email')
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+        model = User
+        lookup_field = 'username'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=('email',),
+                message='Почта уже существует',
+            )
+        ]
+
+        def validate(self, data):
+            if data['username'] == 'me':
+                raise serializers.ValidationError('Нельзя подписаться на себя!')
+            return data
 
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
