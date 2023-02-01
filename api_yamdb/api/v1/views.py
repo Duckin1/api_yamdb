@@ -15,7 +15,7 @@ from users.models import User
 from .permissions import AdminOnlyPermission
 from .serializers import (
     CategorySerializer,
-    TitleSerializer,
+    TitlePostSerializer,
     ReviewSerializer,
     GenreSerializer,
     CommentSerializer,
