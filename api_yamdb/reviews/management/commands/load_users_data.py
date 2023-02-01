@@ -6,7 +6,7 @@ from users.models import User
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('static/data/users.csv', 'r') as csvfile:
+        with open('static/data/users.csv', 'r', encoding='utf-8') as csvfile:
             reader = DictReader(csvfile)
             for row in reader:
                 user = User(id=row['id'], username=row['username'],
