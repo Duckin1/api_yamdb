@@ -9,12 +9,12 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title, Comment
 from users.models import User
 
 from .mixins import CreateListDeleteViewSet
 
-from .permissions import (ReviewAndCommentsPermissions, AdminOnlyPermission, AdminOrReadOnly)
+from .permissions import (ReviewAndCommentsPermissions, AdminOnlyPermission, AdminOrReadOnly, StaffOrAuthorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TokenSerializer, UserSerializer,
@@ -66,17 +66,27 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (ReviewAndCommentsPermissions,)
-
-    def get_review(self):
-        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
+    permission_classes = (StaffOrAuthorOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, review=self.get_review)
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, pk=review_id)
+        serializer.save(author=self.request.user, review=review)
+
+    def perform_update(self, serializer):
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, pk=review_id)
+        comment_id = self.kwargs.get('pk')
+        author = Comment.objects.get(pk=comment_id).author
+        serializer.save(
+            author=author,
+            review_id=review.id
+        )
 
     def get_queryset(self):
-        return self.get_review().comments.all()
-
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, pk=review_id)
+        return review.comments.all()
 
 @api_view(['POST'])
 def sending_mail(request):

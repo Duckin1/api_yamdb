@@ -62,21 +62,19 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментариев."""
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments',
+        related_name='comments'
     )
+    text = models.TextField()
+    pub_date = models.DateTimeField(auto_now_add=True)
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments',
+        related_name='comments'
     )
-    text = models.TextField()
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-
-    def __str__(self):
-        return self.text
 
 
 class GenreTitle(models.Model):
