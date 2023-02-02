@@ -25,7 +25,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
         model = Title
 
     def get_rating(self, obj):
@@ -67,18 +68,19 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         print(self.context)
         author = self.context['request'].user
-        title = get_object_or_404(Title, id=self.context['view'].kwargs.get('title_id'))
+        title_id = self.context['view'].kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
         if self.context['request'].method == 'POST':
-            if Review.objects.filter(title=title, author=self.context['request'].user).exists():
+            if Review.objects.filter(title=title, author=author).exists():
                 raise serializers.ValidationError(
-                    'Вы не можете оставить второй отзыв на это же произведение')
+                    'Вы не можете оставить второй отзыв на это же произведение'
+                )
         return data
 
     class Meta:
         model = Review
         fields = ('id', 'author', 'title', 'text', 'score', 'pub_date')
         read_only_fields = ('title', 'pub_date')
-
 
 
 class CommentSerializer(serializers.ModelSerializer):
