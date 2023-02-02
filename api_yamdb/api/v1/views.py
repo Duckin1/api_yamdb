@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -9,18 +10,19 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Review, Title, Comment
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from django.db import IntegrityError
 
-from .mixins import CreateListDeleteViewSet
 from .filters import TitlesFilter
-from .permissions import (ReviewAndCommentsPermissions, AdminOnlyPermission,
-                          AdminOrReadOnly, StaffOrAuthorOrReadOnly)
+from .mixins import CreateListDeleteViewSet
+from .permissions import (AdminOnlyPermission, AdminOrReadOnly,
+                          ReviewAndCommentsPermissions,
+                          StaffOrAuthorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
-                          TitlePostSerializer, TokenSerializer, UserSerializer,
-                          UserSerializerOrReadOnly, TitleReadSerializer,UserRegisterSerializer)
+                          TitlePostSerializer, TitleReadSerializer,
+                          TokenSerializer, UserRegisterSerializer,
+                          UserSerializer, UserSerializerOrReadOnly)
 
 
 class CategoryViewSet(CreateListDeleteViewSet):
@@ -149,14 +151,6 @@ class UserViewSet(viewsets.ModelViewSet):
         'username',
     ]
 
-    def perform_create(self, serializer):
-        email = self.request.data.get('email')
-        if User.objects.filter(email=email):
-            return Response(
-                'Email уже зарегестрирован', status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer.save()
-
     @action(
         detail=False,
         methods=['get', 'patch'],
@@ -164,9 +158,6 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         user = request.user
-        if request.method == 'GET':
-            serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
         if request.method == 'PATCH':
             serializer = UserSerializerOrReadOnly(
                 user, data=request.data,
@@ -174,3 +165,5 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

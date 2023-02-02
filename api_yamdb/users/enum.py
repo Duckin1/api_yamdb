@@ -1,4 +1,5 @@
 from enum import Enum
+
 from rest_framework import serializers
 
 
@@ -15,5 +16,7 @@ class UserRoles(Enum):
 
     def validate(self, data):
         if data['username'] == 'me':
-            raise serializers.ValidationError('Использовать имя me в качестве username запрещено')
+            raise serializers.ValidationError(
+                'Использовать имя me в качестве username запрещено'
+            )
         return data
