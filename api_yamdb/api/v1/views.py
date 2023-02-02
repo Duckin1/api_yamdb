@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -13,12 +14,14 @@ from reviews.models import Category, Genre, Review, Title, Comment
 from users.models import User
 
 from .mixins import CreateListDeleteViewSet
-
-from .permissions import (ReviewAndCommentsPermissions, AdminOnlyPermission, AdminOrReadOnly, StaffOrAuthorOrReadOnly)
+from .filters import TitlesFilter
+from .permissions import (ReviewAndCommentsPermissions, AdminOnlyPermission,
+                          AdminOrReadOnly, StaffOrAuthorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TokenSerializer, UserSerializer,
-                          UserSerializerOrReadOnly)
+                          UserSerializerOrReadOnly, TitleReadSerializer)
+
 
 class CategoryViewSet(CreateListDeleteViewSet):
     queryset = Category.objects.all()
@@ -41,13 +44,13 @@ class GenreViewSet(CreateListDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('genre',)
+    filterset_class = TitlesFilter
     permission_classes = (AdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
             return TitlePostSerializer
-        return TitlePostSerializer
+        return TitleReadSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
