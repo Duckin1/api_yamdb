@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title, Comment
 from users.models import User
+from django.db import IntegrityError
 
 from .mixins import CreateListDeleteViewSet
 from .filters import TitlesFilter
@@ -19,7 +20,7 @@ from .permissions import (ReviewAndCommentsPermissions, AdminOnlyPermission,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TokenSerializer, UserSerializer,
-                          UserSerializerOrReadOnly, TitleReadSerializer)
+                          UserSerializerOrReadOnly, UserRegisterSerializer)
 
 
 class CategoryViewSet(CreateListDeleteViewSet):
@@ -93,12 +94,17 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def sending_mail(request):
-    serializer = UserSerializer(data=request.data)
+    serializer = UserRegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = User.objects.create(
-        username=serializer.validated_data['username'],
-        email=serializer.validated_data['email'],
-    )
+
+    try:
+        user, _ = User.objects.get_or_create(
+            username=serializer.validated_data['username'],
+            email=serializer.validated_data['email'],
+        )
+    except IntegrityError:
+        return Response('Такой логин или email уже существует',
+                        status=status.HTTP_400_BAD_REQUEST)
     token = default_token_generator.make_token(user)
     user.token = token
     user.save()
@@ -121,7 +127,7 @@ def get_jwt_token(request):
     user = get_object_or_404(
         User, username=serializer.validated_data['username'])
     if default_token_generator.check_token(
-        user, serializer.validated_data['confirmation_code']
+            user, serializer.validated_data['confirmation_code']
     ):
         token = AccessToken.for_user(user)
         return Response({'token': f'{token}'}, status=status.HTTP_200_OK)
@@ -138,29 +144,30 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOnlyPermission,)
     pagination_class = PageNumberPagination
     filter_backends = [filters.SearchFilter]
+    http_method_names = ['get', 'post', 'patch', 'delete']
     search_fields = [
-        "username",
+        'username',
     ]
 
     def perform_create(self, serializer):
-        email = self.request.data.get("email")
+        email = self.request.data.get('email')
         if User.objects.filter(email=email):
             return Response(
-                "Email уже зарегестрирован", status=status.HTTP_400_BAD_REQUEST
+                'Email уже зарегестрирован', status=status.HTTP_400_BAD_REQUEST
             )
         serializer.save()
 
     @action(
         detail=False,
-        methods=["get", "patch"],
-        permission_classes=[IsAuthenticated]
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated, ]
     )
     def me(self, request):
         user = request.user
-        if request.method == "GET":
+        if request.method == 'GET':
             serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == "PATCH":
+        if request.method == 'PATCH':
             serializer = UserSerializerOrReadOnly(
                 user, data=request.data,
                 partial=True)
