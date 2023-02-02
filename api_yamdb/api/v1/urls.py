@@ -13,11 +13,13 @@ router = DefaultRouter()
 router.register('categories', CategoryViewSet)
 router.register('genres', GenreViewSet)
 router.register('titles', TitleViewSet)
-router.register(r'users', UserViewSet, basename='users')
+router.register('users', UserViewSet, basename='users')
 router.register(r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet,
                 basename='review')
-router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-                CommentViewSet, basename='comment')
+router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet, basename='comment'
+)
 
 urlpatterns = [
     path('', include(router.urls)),
