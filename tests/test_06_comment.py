@@ -55,15 +55,15 @@ class Test06CommentAPI:
 
         post_data = {'text': 'test comment'}
         create_single_comment(
-            admin_client, titles[0]["id"], reviews[0]["id"], post_data['text']
+            admin_client, titles[0]['id'], reviews[0]['id'], post_data['text']
         )
         first_review_comment_cnt += 1
         create_single_comment(
-            user_client, titles[0]["id"], reviews[0]["id"], 'qwerty123'
+            user_client, titles[0]['id'], reviews[0]['id'], 'qwerty123'
         )
         first_review_comment_cnt += 1
         response = create_single_comment(
-            moderator_client, titles[0]["id"], reviews[0]["id"], 'qwerty321'
+            moderator_client, titles[0]['id'], reviews[0]['id'], 'qwerty321'
         )
         first_review_comment_cnt += 1
 
