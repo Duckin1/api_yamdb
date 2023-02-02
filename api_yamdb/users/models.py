@@ -1,19 +1,20 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 
 from .enum import UserRoles
 
 
-
-LENGTH_TEXT = 35 # Надо перенести в settings
-
 class User(AbstractUser):
-    '''Класс пользователя.'''
+    """Класс пользователя."""
     username = models.CharField(
         max_length=150,
         verbose_name='Логин',
         unique=True,
-        db_index=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Имя пользователя содержит недопустимый символ'
+        )]
     )
     first_name = models.CharField(
         max_length=150,
@@ -47,7 +48,7 @@ class User(AbstractUser):
         ordering = ('id',)
 
     def __str__(self):
-        return self.username[LENGTH_TEXT]
+        return self.username
 
     @property
     def is_admin(self):
@@ -60,7 +61,3 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == UserRoles.user.name
-
-
-
-
