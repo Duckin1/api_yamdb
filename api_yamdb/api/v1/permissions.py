@@ -17,7 +17,7 @@ def check_patch_delete(request, obj):
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
-    '''Права на изменения только автору либо только просмотр'''
+    """Права на изменения только автору либо только просмотр"""
 
     def has_object_permission(self, request, _view, obj):
         return (request.method in permissions.SAFE_METHODS
@@ -55,12 +55,13 @@ class AdminOnlyPermission(permissions.BasePermission):
     """Права доступа строго только администратора."""
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated and \
-            (request.user.is_admin or request.user.is_superuser)
+        return request.user.is_authenticated and (
+            request.user.is_admin or request.user.is_superuser
+        )
 
 
 class AdminOrReadOnly(permissions.BasePermission):
-    '''Только администратор или чтение.'''
+    """Только администратор или чтение."""
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS

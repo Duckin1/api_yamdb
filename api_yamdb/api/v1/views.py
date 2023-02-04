@@ -123,7 +123,7 @@ def sending_mail(request):
 
 @api_view(['POST'])
 def get_jwt_token(request):
-    '''Получение токена.'''
+    """Получение токена."""
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = get_object_or_404(
