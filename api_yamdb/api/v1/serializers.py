@@ -9,13 +9,13 @@ from users.models import User
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('name', 'slug')
+        exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('name', 'slug')
+        exclude = ('id',)
         model = Genre
 
 
@@ -44,13 +44,13 @@ class TitlePostSerializer(serializers.ModelSerializer):
         slug_field="slug", queryset=Category.objects.all()
     )
 
-    def validate_year(self, data):
-        print(data)
-        if data > int(dt.datetime.now().year):
-            serializers.ValidationError(
-                'Год не может быть в будущем!'
+    def validate_year(self, value):
+        year_now = dt.date.today().year
+        if ((value < 0) or value > year_now):
+            raise serializers.ValidationError(
+                'Год не может быть в будущем или до нашей эры!'
             )
-        return data
+        return value
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
