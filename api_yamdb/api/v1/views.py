@@ -55,12 +55,6 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitlePostSerializer
         return TitleReadSerializer
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(Title.objects.annotate(
-                                        rating=Avg('reviews__score')))
-        serializer = TitleReadSerializer(queryset, many=True)
-        return Response(serializer.data)
-
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
