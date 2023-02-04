@@ -114,13 +114,6 @@ class UserSerializer(serializers.ModelSerializer):
         )
         model = User
         lookup_field = 'username'
-        validators = [
-            UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=('email',),
-                message='Почта уже существует',
-            )
-        ]
 
     def validate(self, data):
         if data.get('username') == 'me':
