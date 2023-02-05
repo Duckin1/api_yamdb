@@ -17,8 +17,7 @@ from users.models import User
 from .filters import TitlesFilter
 from .mixins import CreateListDeleteViewSet
 from .permissions import (AdminOnlyPermission, AdminOrReadOnly,
-                          ReviewAndCommentsPermissions,
-                          StaffOrAuthorOrReadOnly)
+                          ReviewAndCommentsPermissions)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitlePostSerializer, TitleReadSerializer,
@@ -72,7 +71,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (StaffOrAuthorOrReadOnly,)
+    permission_classes = (ReviewAndCommentsPermissions,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
