@@ -44,7 +44,7 @@ class GenreViewSet(CreateListDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
     permission_classes = (AdminOrReadOnly,)
