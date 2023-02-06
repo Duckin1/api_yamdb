@@ -1,60 +1,57 @@
 import datetime as dt
 
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('name', 'slug')
+        exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('name', 'slug')
+        exclude = ('id',)
         model = Genre
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True, many=False)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category',
                   'rating')
         model = Title
 
-    def get_rating(self, obj):
-        return obj.reviews.all().aggregate(Avg('score'))['score__avg']
-
 
 class TitlePostSerializer(serializers.ModelSerializer):
     description = serializers.CharField(required=False)
     genre = serializers.SlugRelatedField(
-        slug_field="slug",
+        slug_field='slug',
         queryset=Genre.objects.all(),
         many=True,
     )
     category = serializers.SlugRelatedField(
-        slug_field="slug", queryset=Category.objects.all()
+        slug_field='slug', queryset=Category.objects.all()
     )
+    rating = serializers.IntegerField(read_only=True)
 
-    def validate_year(self, data):
-        print(data)
-        if data > int(dt.datetime.now().year):
-            serializers.ValidationError(
-                'Год не может быть в будущем!'
+    def validate_year(self, value):
+        year_now = dt.date.today().year
+        if ((value < 0) or value > year_now):
+            raise serializers.ValidationError(
+                'Год не может быть в будущем или до нашей эры!'
             )
-        return data
+        return value
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',
+                  'rating')
         model = Title
 
 
@@ -67,7 +64,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        print(self.context)
         author = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
@@ -115,13 +111,6 @@ class UserSerializer(serializers.ModelSerializer):
         )
         model = User
         lookup_field = 'username'
-        validators = [
-            UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=('email',),
-                message='Почта уже существует',
-            )
-        ]
 
     def validate(self, data):
         if data.get('username') == 'me':

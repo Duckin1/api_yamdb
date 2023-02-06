@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from users.models import User
@@ -29,7 +31,9 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     name = models.TextField(max_length=256)
-    year = models.IntegerField()
+    year = models.IntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(int(dt.date.today().year))
+    ])
     description = models.TextField()
 
 
@@ -45,8 +49,9 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.TextField()
-    score = models.IntegerField(validators=[
-        MinValueValidator(1), MaxValueValidator(10)
+    score = models.IntegerField(db_index=True, validators=[
+        MinValueValidator(1, message='Рейтинг не может быть меньше 1!'),
+        MaxValueValidator(10, message='Рейтинг не может быть больше 10!')
     ])
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
