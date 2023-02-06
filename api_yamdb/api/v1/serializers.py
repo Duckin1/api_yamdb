@@ -32,12 +32,12 @@ class TitleReadSerializer(serializers.ModelSerializer):
 class TitlePostSerializer(serializers.ModelSerializer):
     description = serializers.CharField(required=False)
     genre = serializers.SlugRelatedField(
-        slug_field="slug",
+        slug_field='slug',
         queryset=Genre.objects.all(),
         many=True,
     )
     category = serializers.SlugRelatedField(
-        slug_field="slug", queryset=Category.objects.all()
+        slug_field='slug', queryset=Category.objects.all()
     )
     rating = serializers.IntegerField(read_only=True)
 
